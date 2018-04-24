@@ -15,7 +15,7 @@ library(dplyr)
 library(corrplot)
 
 # Create Connection - Use DNS setup on laptop/server
-dbConn <- odbcConnect("RConnection",uid="TableauUser", pwd="Tableau")
+dbConn <- odbcConnect("YourDNS",uid="***", pwd="***")
 
 # Run query retrieve data select two columns generate correlation
 df <- sqlQuery(dbConn, paste("select [State], count(distinct NPI) as 'Total NPIs', Deaths as 'Overdose Deaths'", 
