@@ -1,11 +1,10 @@
 
 /**************************************************************************
 
-				 DATA PRE-PROCESSING / PREPARATION 
-				 STAGING FOR TABLEAU OPIATE DATA ANALYSIS
+		DATA PRE-PROCESSING / PREPARATION 
+	      STAGING FOR TABLEAU OPIATE DATA ANALYSIS
 
 **************************************************************************/
-
 
 /* 
 
@@ -20,15 +19,13 @@ Upload prescriber-info.csv into <your db name>.dbo.cms-prescriber-info,
 
 */
 
-
-USE ECE -- Use ECE database
 /* Stage opioids.csv file to one column remove combine brand name and generic name */
 TRUNCATE TABLE [cms-opioids]
 INSERT INTO [cms-opioids]
     -- Replace - with space. There are no dashes in the drug name within cms-prescriber-info table
 	SELECT replace([Drug Name],'-',' ') as [Drug Name]
 	FROM [ECE].[dbo].[cms-opioids-stg]
-		UNION
+	UNION
    -- Replace / with space. There are no forward slashes in the drug name within cms-prescriber-info table
 	SELECT replace([Generic Name],'/',' ') as [Drug Name]
 	FROM [ECE].[dbo].[cms-opioids-stg]
@@ -38,11 +35,11 @@ INSERT INTO [cms-opioids]
 TRUNCATE TABLE  [cms-clusters]
 INSERT INTO [cms-clusters]
 	SELECT replace([pain medicine],'.',' ') as Drug,
-		  'pain medicine' as [Use]
+	      'pain medicine' as [Use]
 	FROM [ECE].[dbo].[cms-clusters-stg]
 	UNION
 	SELECT replace([sleep/anxiety],'.',' ') as Drug,
-		   'sleep/anxiety' as [Use]
+	      'sleep/anxiety' as [Use]
 	FROM [ECE].[dbo].[cms-clusters-stg]
 
 -- Declare variables for excuting dynamic SQL
@@ -57,45 +54,45 @@ DECLARE @SQL VARCHAR(MAX)
 -- us @ColumnNames in Dynamic SQL below
 */
 SET @ColumnNames = (SELECT DISTINCT sq.Columns
-					  FROM sys.tables t 
-					  INNER JOIN 
-						   (
-					SELECT OBJECT_ID, 
-						   Columns = STUFF((SELECT ',' + '['+sc.name+']'
-											FROM sys.columns sc
-											WHERE sc.object_id = s.object_id
-											AND sc.name in (SELECT [Drug Name] as [Opioids/Opiates]
-															  FROM [ECE].[dbo].[cms-opioids]
-															UNION 
-															SELECT [Drug] as [Opioids/Opiates]
-															  FROM [ECE].[dbo].[cms-clusters])
-											FOR XML PATH('')),1,1,'')
-					  FROM sys.columns s 
+			FROM sys.tables t 
+			INNER JOIN 
+			 (
+			SELECT OBJECT_ID, 
+			       Columns = STUFF((SELECT ',' + '['+sc.name+']'
+						 FROM sys.columns sc
+						WHERE sc.object_id = s.object_id
+						AND sc.name in (SELECT [Drug Name] as [Opioids/Opiates]
+								FROM [ECE].[dbo].[cms-opioids]
+								UNION 
+								SELECT [Drug] as [Opioids/Opiates]
+								FROM [ECE].[dbo].[cms-clusters])
+					FOR XML PATH('')),1,1,'')
+			 FROM sys.columns s 
 					) 
-					  sq ON t.object_id = sq.object_id
-					  WHERE t.name = 'cms-prescriber-info')
+		     sq ON t.object_id = sq.object_id
+		     WHERE t.name = 'cms-prescriber-info')
 
 -- Use print to debug
 -- PRINT @ColumnNames 
 -- The same logic as the one above. Included alias with brackets[]
 SET @SelectColumnNames = (SELECT DISTINCT ltrim(rtrim(sq.Columns)) 
-						  FROM sys.tables t
-							   INNER JOIN 
-							   (
-								SELECT OBJECT_ID, 
-									  Columns = STUFF((SELECT ',' + 'prs.['+sc.name+']'
-													   FROM sys.columns sc
-													   WHERE sc.object_id = s.object_id
-													   AND sc.name in (SELECT [Drug Name] as [Opioids/Opiates]
-																			  FROM [ECE].[dbo].[cms-opioids]
-																			UNION 
-																			SELECT [Drug] as [Opioids/Opiates]
-																			  FROM [ECE].[dbo].[cms-clusters])
-													  FOR XML PATH('')),1,1,'')
-								FROM sys.columns s 
-								) 
-							sq ON t.object_id = sq.object_id
-							WHERE t.name = 'cms-prescriber-info') 
+			  FROM sys.tables t
+			  INNER JOIN 
+			   (
+			 SELECT OBJECT_ID, 
+				 Columns = STUFF((SELECT ',' + 'prs.['+sc.name+']'
+						  FROM sys.columns sc
+						  WHERE sc.object_id = s.object_id
+						  AND sc.name in (SELECT [Drug Name] as [Opioids/Opiates]
+								  FROM [ECE].[dbo].[cms-opioids]
+								  UNION 
+								  SELECT [Drug] as [Opioids/Opiates]
+								  FROM [ECE].[dbo].[cms-clusters])
+						 FOR XML PATH('')),1,1,'')
+			 FROM sys.columns s 
+			                  ) 
+			sq ON t.object_id = sq.object_id
+			WHERE t.name = 'cms-prescriber-info') 
 
 -- Use print to debug
 -- PRINT @SelectColumnNames
@@ -106,8 +103,8 @@ SET @SQL =
 			'TRUNCATE TABLE [cms-data-load-stg]
 			INSERT INTO [cms-data-load-stg]
 			SELECT [NPI] ,[Gender] , case when [Gender] = ''F'' then ''Female''
-										  when [Gender] = ''M'' then ''Male''
-										  else ''Not Found'' end as [Gender Description],[Credentials] ,[Specialty] ,Abbrev,[State] ,[Population] ,[Deaths], [Opioid Prescriber], [Drug_Name], [Value]
+						when [Gender] = ''M'' then ''Male''
+						else ''Not Found'' end as [Gender Description],[Credentials] ,[Specialty] ,Abbrev,[State] ,[Population] ,[Deaths], [Opioid Prescriber], [Drug_Name], [Value]
 			FROM
 			(SELECT prs.[NPI] ,prs.[Gender] ,prs.[Credentials] ,prs.[Specialty] ,prs.[State] as Abbrev
 				  ,isnull(st.[State], ''Not Found'') as [State] ,isnull(st.[Population],0) as [Population] ,isnull(st.[Deaths],0) as [Deaths], prs.[Opioid Prescriber]
@@ -144,8 +141,3 @@ SELECT ld.[NPI]
 	  ,[Common Use] = (SELECT [Use] FROM ECE.[dbo].[cms-clusters] WHERE drug = ld.[Drug_Name])
       ,ld.[Value]
   FROM [ECE].[dbo].[cms-data-load-stg] ld
-
-
-
-
-
