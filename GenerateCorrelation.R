@@ -4,7 +4,7 @@
 
 **********************************************************************'
 
-setwd("C:/ECE/Tableau/Capstone/Capstone Opiate")
+setwd("set your working directory")
 
 if("RODBC" %in% rownames(installed.packages()) == FALSE) {install.packages("RODBC")}
 if("dplyr" %in% rownames(installed.packages()) == FALSE) {install.packages("dplyr")}
@@ -14,7 +14,7 @@ library(RODBC)
 library(dplyr)
 library(corrplot)
 
-# Create Connection - Use DNS setup on laptop/server
+# Create Connection - Use DNS setup 
 dbConn <- odbcConnect("YourDNS",uid="***", pwd="***")
 
 # Run query retrieve data select two columns generate correlation
