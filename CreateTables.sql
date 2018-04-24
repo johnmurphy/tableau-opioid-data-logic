@@ -1,4 +1,4 @@
-USE [ECE]
+USE [Your Database]
 GO
 /****** Object:  Table [dbo].[cms-clusters]  ******/
 SET ANSI_NULLS ON
