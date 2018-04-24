@@ -14,9 +14,9 @@ I used SQL Server 2014 Express and created a local db on my laptop.
 Use any db name that you would like.
 
 Upload prescriber-info.csv into <your db name>.dbo.cms-prescriber-info, 
-       opioids.csv int <your db name>.dbo.cms-opioids.csv
-       overdoses.csv into <your db name>.dbo.cms-overdoses.csv
-
+       opioids.csv int <your db name>.dbo.cms-opioids
+       overdoses.csv into <your db name>.dbo.cms-overdoses
+       Clusters.xlsx into <your db name>.dbo.cms-clusters-stg
 */
 
 /* Stage opioids.csv file to one column remove combine brand name and generic name */
