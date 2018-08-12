@@ -51,7 +51,7 @@ DECLARE @SQL VARCHAR(MAX)
 -- Get only the opioid drug name from the columns in cms-prescriber-info. There are 
 -- 250 drugs we do not need the non-opioid drugs for our dashboard
 -- use system tables to get columns names into rows and assign to @ColumnNames as a string
--- us @ColumnNames in Dynamic SQL below
+-- use @ColumnNames in Dynamic SQL below
 */
 SET @ColumnNames = (SELECT DISTINCT sq.Columns
 			FROM sys.tables t 
